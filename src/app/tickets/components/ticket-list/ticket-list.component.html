@@ -1,1 +1,106 @@
-<p>ticket-list works!</p>
+<div class="ticket-container">
+
+  <!-- Header -->
+  <div class="ticket-header">
+    <h1>Gestión de Tickets</h1>
+
+    <!-- Filtro por estado -->
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Filtrar por estado</mat-label>
+      <mat-select [formControl]="filterControl">
+        <mat-option *ngFor="let option of statusOptions" [value]="option">
+          {{ option }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Estado de carga -->
+  <div class="loading-overlay" *ngIf="loading">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Cargando tickets...</p>
+  </div>
+
+  <!-- Estado de error -->
+  <div class="error-message" *ngIf="error && !loading">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-wrapper" *ngIf="!loading && !error">
+
+    <table mat-table [dataSource]="dataSource" matSort class="ticket-table">
+
+      <!-- Columna ID -->
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> # </th>
+        <td mat-cell *matCellDef="let ticket"> {{ ticket.id }} </td>
+      </ng-container>
+
+      <!-- Columna Nombre -->
+      <ng-container matColumnDef="nombre">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre </th>
+        <td mat-cell *matCellDef="let ticket"> {{ ticket.nombre }} </td>
+      </ng-container>
+
+      <!-- Columna Tipo -->
+      <ng-container matColumnDef="tipo">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
+        <td mat-cell *matCellDef="let ticket"> {{ ticket.tipo }} </td>
+      </ng-container>
+
+      <!-- Columna Estado -->
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+        <td mat-cell *matCellDef="let ticket">
+          <mat-chip-listbox class="status-chip-list">
+            <mat-chip [ngClass]="getStatusClass(ticket.estado)">
+              {{ ticket.estado }}
+            </mat-chip>
+          </mat-chip-listbox>
+        </td>
+      </ng-container>
+
+      <!-- Columna Fecha -->
+      <ng-container matColumnDef="fecha">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha </th>
+        <td mat-cell *matCellDef="let ticket">
+          {{ ticket.fecha | date: 'dd/MM/yyyy' }}
+        </td>
+      </ng-container>
+
+      <!-- Columna Acciones -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+        <td mat-cell *matCellDef="let ticket">
+          <mat-form-field appearance="outline" class="action-select">
+            <mat-select
+              [value]="ticket.estado"
+              (selectionChange)="onStatusChange(ticket.id, $event.value)"
+              matTooltip="Cambiar estado del ticket">
+              <mat-option
+                *ngFor="let option of ticketStatusOptions"
+                [value]="option">
+                {{ option }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <!-- Fila vacía -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell no-data-cell" [colSpan]="displayedColumns.length">
+          <mat-icon>inbox</mat-icon>
+          <p>No hay tickets para el estado seleccionado</p>
+        </td>
+      </tr>
+
+    </table>
+  </div>
+
+</div>
